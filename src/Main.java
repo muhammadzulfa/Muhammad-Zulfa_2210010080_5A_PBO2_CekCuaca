@@ -4,6 +4,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -47,7 +50,7 @@ public class Main extends javax.swing.JFrame {
         btnCekCuaca = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        tblCuaca = new javax.swing.JTable();
         btnSimpanCsv = new javax.swing.JButton();
         btnSimpanCsv1 = new javax.swing.JButton();
         lblIconCuaca = new javax.swing.JLabel();
@@ -89,18 +92,23 @@ public class Main extends javax.swing.JFrame {
 
         jLabel4.setText("Hasil Perkiraan Cuaca:");
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        tblCuaca.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Label", "Value"
             }
-        ));
-        jScrollPane2.setViewportView(jTable2);
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(tblCuaca);
 
         btnSimpanCsv.setText("Simpan .CSV");
 
@@ -121,9 +129,8 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnCekCuaca)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
                                 .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtKota))
+                                .addComponent(txtKota, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
                             .addComponent(lblIconCuaca, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(87, 87, 87))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -136,6 +143,10 @@ public class Main extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(btnSimpanCsv1)))
                         .addContainerGap(16, Short.MAX_VALUE))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(122, 122, 122))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -157,7 +168,7 @@ public class Main extends javax.swing.JFrame {
                     .addComponent(jLabel4)
                     .addComponent(lblIconCuaca, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnSimpanCsv1)
@@ -179,17 +190,32 @@ public class Main extends javax.swing.JFrame {
         
         try {
             String dataCuaca = getCuaca(kota);
-            System.out.println(dataCuaca);
             
             if (dataCuaca != null) {
                 JSONObject json = new JSONObject(dataCuaca);
                 
                 JSONArray weatherArray = json.getJSONArray("weather");
                 JSONObject weatherObject = weatherArray.getJSONObject(0);
+                
+                JSONObject mainObject = json.getJSONObject("main");
+                
                 String iconUrl = "http://openweathermap.org/img/wn/" + weatherObject.getString("icon") + ".png";
                 
+                // Menampilkan cuaca dalam bentuk gambar
                 ImageIcon weatherIcon = new ImageIcon(new URL(iconUrl));
                 lblIconCuaca.setIcon(weatherIcon);
+                
+                // Menampilkan data cuaca dalam bentuk tabel
+                DefaultTableModel model = (DefaultTableModel) tblCuaca.getModel();
+                model.setRowCount(0); // Hapus semua record
+                // Add records
+                model.addRow(new Object[]{"Kota", json.getString("name")});
+                model.addRow(new Object[]{"Deskripsi", weatherObject.getString("description")});
+                model.addRow(new Object[]{"Suhu", String.valueOf(mainObject.getDouble("temp")) + "C"});
+                model.addRow(new Object[]{"Terasa Seperti", String.valueOf(mainObject.getDouble("feels_like")) + "C"});
+                model.addRow(new Object[]{"Kelembapan", String.valueOf(mainObject.getInt("humidity")) + "%"});
+            } else {
+                JOptionPane.showMessageDialog(null, "Kota tidak ditemukan!", "Error!", JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -244,8 +270,8 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JLabel lblIconCuaca;
+    private javax.swing.JTable tblCuaca;
     private javax.swing.JTextField txtKota;
     // End of variables declaration//GEN-END:variables
     
