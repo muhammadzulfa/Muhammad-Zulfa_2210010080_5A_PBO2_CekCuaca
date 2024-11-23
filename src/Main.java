@@ -1,8 +1,12 @@
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -111,6 +115,11 @@ public class Main extends javax.swing.JFrame {
         jScrollPane2.setViewportView(tblCuaca);
 
         btnSimpanCsv.setText("Simpan .CSV");
+        btnSimpanCsv.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanCsvActionPerformed(evt);
+            }
+        });
 
         btnSimpanCsv1.setText("Muat .CSV");
 
@@ -221,6 +230,49 @@ public class Main extends javax.swing.JFrame {
             System.out.println(e.getMessage());
         }
     }//GEN-LAST:event_btnCekCuacaActionPerformed
+
+    private void btnSimpanCsvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanCsvActionPerformed
+        try {
+            // Mendapatkan tanggal dan waktu saat ini dalam format YYYY-MM-DD_HHMMSS
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+            String formattedDateTime = now.format(formatter);
+
+            // Membuat nama file dengan menambahkan kota dan tanggal-waktu
+            String fileName = "Cuaca_" + txtKota.getText() + "_" + formattedDateTime + ".csv";
+            FileWriter writer = new FileWriter(fileName);
+
+            // Menulis nama kolom ke file CSV
+            DefaultTableModel model = (DefaultTableModel) tblCuaca.getModel();
+            for (int i = 0; i < model.getColumnCount(); i++) {
+                writer.append(model.getColumnName(i));
+                if (i < model.getColumnCount() - 1) {
+                    writer.append(",");
+                }
+            }
+            writer.append("\n");
+
+            // Menulis data tabel ke file CSV
+            for (int i = 0; i < model.getRowCount(); i++) {
+                for (int j = 0; j < model.getColumnCount(); j++) {
+                    writer.append(model.getValueAt(i, j).toString());
+                    if (j < model.getColumnCount() - 1) {
+                        writer.append(",");
+                    }
+                }
+                writer.append("\n");
+            }
+
+            // Menutup writer
+            writer.flush();
+            writer.close();
+
+            JOptionPane.showMessageDialog(null, "Data cuaca telah disimpan ke " + fileName, "Sukses", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat menyimpan data ke file CSV", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnSimpanCsvActionPerformed
 
     /**
      * @param args the command line arguments
