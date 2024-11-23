@@ -1,3 +1,10 @@
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import org.json.JSONObject;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -8,6 +15,8 @@
  * @author mhmmd
  */
 public class Main extends javax.swing.JFrame {
+    private static final String API_KEY = "e7397caec8b8084cd05929d84390dda7"; // Masukkan API key Anda
+    private static final String API_URL = "http://api.openweathermap.org/data/2.5/weather";
 
     /**
      * Creates new form Main
@@ -69,6 +78,11 @@ public class Main extends javax.swing.JFrame {
         });
 
         btnCekCuaca.setText("Cek Cuaca");
+        btnCekCuaca.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCekCuacaActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("Hasil Perkiraan Cuaca:");
 
@@ -154,6 +168,22 @@ public class Main extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtKotaActionPerformed
 
+    private void btnCekCuacaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCekCuacaActionPerformed
+        String kota = txtKota.getText();
+        
+        try {
+            String dataCuaca = getCuaca(kota);
+            System.out.println(dataCuaca);
+            
+            if (dataCuaca != null) {
+                JSONObject json = new JSONObject(dataCuaca);
+                System.out.println(json.getString("name"));
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }//GEN-LAST:event_btnCekCuacaActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -205,4 +235,30 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JTable jTable2;
     private javax.swing.JTextField txtKota;
     // End of variables declaration//GEN-END:variables
+    
+    public static String getCuaca(String city) throws Exception {
+        String urlString = API_URL + "?q=" + city + "&appid=" + API_KEY + "&units=metric";
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setRequestMethod("GET");
+        connection.setConnectTimeout(5000);
+        connection.setReadTimeout(5000);
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == 200) { // HTTP OK
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            reader.close();
+            return response.toString();
+        } else {
+            System.out.println("Gagal mendapatkan data. HTTP Response Code: " + responseCode);
+            return null;
+        }
+    }
 }
