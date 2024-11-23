@@ -3,6 +3,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import javax.swing.ImageIcon;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /*
@@ -48,6 +50,7 @@ public class Main extends javax.swing.JFrame {
         jTable2 = new javax.swing.JTable();
         btnSimpanCsv = new javax.swing.JButton();
         btnSimpanCsv1 = new javax.swing.JButton();
+        lblIconCuaca = new javax.swing.JLabel();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -120,7 +123,8 @@ public class Main extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
                                 .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(txtKota)))
+                                .addComponent(txtKota))
+                            .addComponent(lblIconCuaca, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(87, 87, 87))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -148,9 +152,11 @@ public class Main extends javax.swing.JFrame {
                     .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(btnCekCuaca)
-                .addGap(30, 30, 30)
-                .addComponent(jLabel4)
-                .addGap(30, 30, 30)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(lblIconCuaca, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -177,7 +183,13 @@ public class Main extends javax.swing.JFrame {
             
             if (dataCuaca != null) {
                 JSONObject json = new JSONObject(dataCuaca);
-                System.out.println(json.getString("name"));
+                
+                JSONArray weatherArray = json.getJSONArray("weather");
+                JSONObject weatherObject = weatherArray.getJSONObject(0);
+                String iconUrl = "http://openweathermap.org/img/wn/" + weatherObject.getString("icon") + ".png";
+                
+                ImageIcon weatherIcon = new ImageIcon(new URL(iconUrl));
+                lblIconCuaca.setIcon(weatherIcon);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -233,6 +245,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
+    private javax.swing.JLabel lblIconCuaca;
     private javax.swing.JTextField txtKota;
     // End of variables declaration//GEN-END:variables
     
