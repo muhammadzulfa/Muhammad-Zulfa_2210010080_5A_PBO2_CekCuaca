@@ -1,5 +1,7 @@
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,7 +10,9 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import org.json.JSONArray;
@@ -122,6 +126,11 @@ public class Main extends javax.swing.JFrame {
         });
 
         btnSimpanCsv1.setText("Muat .CSV");
+        btnSimpanCsv1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSimpanCsv1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -239,7 +248,7 @@ public class Main extends javax.swing.JFrame {
             String formattedDateTime = now.format(formatter);
 
             // Membuat nama file dengan menambahkan kota dan tanggal-waktu
-            String fileName = "Cuaca_" + txtKota.getText() + "_" + formattedDateTime + ".csv";
+            String fileName = "Cuaca_" + (txtKota.getText() != null ? txtKota.getText() : "Unknown") + "_" + formattedDateTime + ".csv";
             FileWriter writer = new FileWriter(fileName);
 
             // Menulis nama kolom ke file CSV
@@ -273,6 +282,58 @@ public class Main extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Terjadi kesalahan saat menyimpan data ke file CSV", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnSimpanCsvActionPerformed
+
+    private void btnSimpanCsv1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanCsv1ActionPerformed
+         // Membuat instance JFileChooser untuk membuka file
+        JFileChooser fileChooser = new JFileChooser();
+
+        // Menambahkan filter hanya untuk menampilkan file CSV
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("CSV Files", "csv");
+        fileChooser.setFileFilter(filter);
+
+        // Membuka dialog untuk memilih file
+        int returnValue = fileChooser.showOpenDialog(this);
+
+        // Jika file dipilih
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+
+            // Ambil path file yang dipilih
+            String filePath = selectedFile.getAbsolutePath();
+
+            DefaultTableModel model = (DefaultTableModel) tblCuaca.getModel();
+            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+                String line;
+                boolean isFirstLine = true;
+
+                // Membaca file CSV baris per baris
+                while ((line = br.readLine()) != null) {
+                    String[] values = line.split(",");
+
+                    // Menambahkan nama kolom hanya pada baris pertama
+                    if (isFirstLine) {
+                        // Hapus kolom lama jika ada
+                        model.setColumnCount(0);
+
+                        // Menambahkan kolom baru dari header CSV
+                        for (String value : values) {
+                            model.addColumn(value);
+                        }
+                        isFirstLine = false;
+                    } else {
+                        // Menambahkan data baris
+                        model.addRow(values);
+                    }
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Terjadi kesalahan saat membaca file CSV", "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+        } else {
+            // Jika pengguna membatalkan pemilihan file
+            JOptionPane.showMessageDialog(this, "Tidak ada file yang dipilih.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_btnSimpanCsv1ActionPerformed
 
     /**
      * @param args the command line arguments
