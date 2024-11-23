@@ -9,6 +9,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -30,6 +33,7 @@ import org.json.JSONObject;
 public class Main extends javax.swing.JFrame {
     private static final String API_KEY = "e7397caec8b8084cd05929d84390dda7"; // Masukkan API key Anda
     private static final String API_URL = "http://api.openweathermap.org/data/2.5/weather";
+    private List<String> kotaFavoritList = new ArrayList<>();
 
     /**
      * Creates new form Main
@@ -54,7 +58,7 @@ public class Main extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         txtKota = new javax.swing.JTextField();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        cbbFavorit = new javax.swing.JComboBox<>();
         btnCekCuaca = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -88,6 +92,12 @@ public class Main extends javax.swing.JFrame {
         txtKota.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtKotaActionPerformed(evt);
+            }
+        });
+
+        cbbFavorit.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbFavoritItemStateChanged(evt);
             }
         });
 
@@ -147,7 +157,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnCekCuaca)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cbbFavorit, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(txtKota, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
                             .addComponent(lblIconCuaca, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(87, 87, 87))
@@ -178,7 +188,7 @@ public class Main extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbbFavorit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(btnCekCuaca)
                 .addGap(18, 18, 18)
@@ -204,7 +214,19 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_txtKotaActionPerformed
 
     private void btnCekCuacaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCekCuacaActionPerformed
-        String kota = txtKota.getText();
+         String kota = txtKota.getText();
+
+        // Cek apakah kota tidak kosong
+        if (!kota.trim().isEmpty()) {
+            // Menambahkan kota ke dalam list
+            kotaFavoritList.add(kota);
+
+            // Memperbarui ComboBox dengan daftar kota favorit
+            updateComboBoxFavorit();
+        } else {
+            // Tampilkan pesan jika kota kosong
+            JOptionPane.showMessageDialog(this, "Nama kota tidak boleh kosong!", "Peringatan", JOptionPane.WARNING_MESSAGE);
+        }
         
         try {
             String dataCuaca = getCuaca(kota);
@@ -335,6 +357,10 @@ public class Main extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnSimpanCsv1ActionPerformed
 
+    private void cbbFavoritItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbbFavoritItemStateChanged
+        txtKota.setText(cbbFavorit.getSelectedItem().toString());
+    }//GEN-LAST:event_cbbFavoritItemStateChanged
+
     /**
      * @param args the command line arguments
      */
@@ -374,7 +400,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JButton btnCekCuaca;
     private javax.swing.JButton btnSimpanCsv;
     private javax.swing.JButton btnSimpanCsv1;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JComboBox<String> cbbFavorit;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -412,5 +438,19 @@ public class Main extends javax.swing.JFrame {
             System.out.println("Gagal mendapatkan data. HTTP Response Code: " + responseCode);
             return null;
         }
+    }
+    
+    // Fungsi untuk memperbarui ComboBox dengan daftar kota favorit
+    private void updateComboBoxFavorit() {
+        // Membuat model baru untuk ComboBox
+        DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+
+        // Menambahkan kota-kota favorit ke dalam model
+        for (String kota : kotaFavoritList) {
+            model.addElement(kota);
+        }
+
+        // Set model ComboBox menjadi model baru
+        cbbFavorit.setModel(model);
     }
 }
